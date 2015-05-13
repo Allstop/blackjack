@@ -4,65 +4,75 @@ namespace Mvc\Model;
 
 class Model
 {
+    private static $suits = array("♣", "♥", "♠", "♦");
 
-    public $suits = array("♣", "♥", "♠", "♦");
+    private static $values = array("A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K");
+    public static $user = null;
 
-    public $values = array("A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K");
+    public static function init()
+    {
+        if (!static::$user) {
+            static::$user = new self();
+        }
+        return static::$user;
+    }
 
-    public function createDeck()
+    public function game_Deal()
     {
         $deck = array();
         for ($i = 0; $i < 13; $i++)
         {
             for($j = 0; $j < 4; $j++)
             {
-                array_push($deck,$this->values[$i].$this->suits[$j]);
+                array_push($deck, self::$values[$i].self::$suits[$j]);
             }
         }
         //亂數排序
         shuffle($deck);
-        return $deck;
+        $first[1] = array_pop($deck);
+        $a[2] = array_pop($deck);
+        $b[1] = array_pop($deck);
+        $b[2] = array_pop($deck);
+        return array(f=>$first, a=>$a, b=>$b, deck=>$deck);
     }
+
     public function game_Sum($data){
-        $output = "";
         $sum = "";
         foreach ($data as $key=>$value) {
-            if ($key!='deck') {
-                for($i=1;$i<count($data[$key])+1;$i++){
-                    $sum[$i] = substr($data[$key][$i],0,-3);
-                    if (preg_match('/[JQK]/', $sum[$i])) {
-                        $sum[$i] = 10;
-                    } elseif (preg_match('/[A]/', $sum[$i])) {
-                        $sum[$i] = 11;
-                    }
-                    $output[$key] .= $data[$key][$i];
-                    $output[$key] .= " ";
-                }
-                $sumValue[$key] = array_sum($sum);
-                if (in_array(11,$sum) && $sumValue[$key]>21) {
-                    for($i=1;$i<count($data[$key])+1;$i++){
-                        if (preg_match('/11/', $sum[$i])) {
-                            while ($sumValue[$key]>21) {
-                                $sum[$i] = 1;
-                                $sumValue[$key] = array_sum($sum);
-                                break;
-                            }
-                        }
-                    }
-                }
+            if (preg_match('/[0-9]/',$key)) {
+                $sum[$key]=substr($data[$key],0,-3);
+            }
+            if (preg_match('/[JQK]/', $sum[$key])) {
+                $sum[$key] = 10;
+            } elseif (preg_match('/[A]/', $sum[$key])) {
+                $sum[$key] = 11;
+            }
+            $sumValue = array_sum($sum);
+        }
+        foreach ($sum as $key=>$value) {
+            while (preg_match('/11/', $sum[$key]) && $sumValue>21) {
+                $sum[$key] = 1;
+                $sumValue = array_sum($sum);
             }
         }
+        return array(num=>$sum, sumValue=>$sumValue);
+    }
 
-        return array(output=>$output, sumValue=>$sumValue);
+    public function game_Spilt($data){
+        $b1[1] =$data[1] ;
+        $b1['num'][1] =$data['num'][1] ;
+        $b2[1] =$data[2] ;
+        $b2['num'][1] =$data['num'][2] ;
+        return array(b1=>$b1, b2=>$b2);
     }
     public function game_Hit($_data, $_deck)
     {
-        $j = count($_data)+1;
+        $j=count($_data)-1;
         $_data[$j] = array_pop($_deck);
-        return array(data=>$_data, deck=>$_deck);
+        return array(num=>$j, data=>$_data[$j], deck=>$_deck);
     }
 
-    public function game_Fold($data, $sum)
+    public function game_Stand($data, $sum)
     {
         $a=$this->game_Sum($data)['output']['a'];
         $sum['a']=$this->game_Sum($data)['sumValue']['a'];

@@ -7,10 +7,16 @@
     </head>
     <body>
         <h1>Welcome for Playing BLACKJACK!</h1><br><br>
+
         <div id="game"></div><br><br>
-        <input type='submit' class="submit_fold" name='a' value='送出'>&nbsp;
-        <input type='submit' class="submit_hit" name='a' value='發牌'><br><br>
-        <input type='submit' class="submit_reset" name='a' value='開新局'>
+        <div id="new_game">
+            <input type='submit' class="submit_insurance" name='a' value='保險(Insurance)'>
+            <input type='submit' class="submit_spilt" name='a' value='分牌(Spilt)'>
+            <input type='submit' class="submit_double" name='a' value='雙倍(Double)'>
+            <input type='submit' class="submit_hit" name='a' value='發牌(Hit)'>
+            <input type='submit' class="submit_stand" name='a' value='送出(Stand)'>
+        </div>
+        <input type='submit' class="submit_deal" name='a' value='開新局(Deal)'>
         <script src="../public/js/jquery-1.11.2.min.js"></script>
         <script src="../public/js/main.js"></script>
     </body>

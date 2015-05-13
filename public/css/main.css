@@ -3,29 +3,31 @@ body {
    padding: 0;
    width: 100%;
    height: 100%;
-   color: #B0BEC5;
+   color: black;
    display: table;
    font-weight: 100;
    font-family: 'Lato';
 }
-#start {
-   width:200px;
-   height:40px;
-   font-size:20px;
+input {
+   font-size:16px;
+   font-family:Arial;
+   font-weight:normal;
+   -moz-border-radius:8px;
+   -webkit-border-radius:8px;
+   border-radius:8px;
+   border:1px solid #3866a3;
+   padding:9px 18px;
+   text-decoration:none;
+   background:-moz-linear-gradient( center top, #63b8ee 52%, #468ccf 53% );
+   background:-ms-linear-gradient( top, #63b8ee 52%, #468ccf 53% );
+   filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#63b8ee', endColorstr='#468ccf');
+   background:-webkit-gradient( linear, left top, left bottom, color-stop(52%, #63b8ee), color-stop(53%, #468ccf) );
+   background-color:#63b8ee;
+   color:#14396a;
+   display:inline-block;
+   text-shadow:1px 1px 0px #7cacde;
+   -webkit-box-shadow:inset 1px 1px 0px 0px #bee2f9;
+   -moz-box-shadow:inset 1px 1px 0px 0px #bee2f9;
+   box-shadow:inset 1px 1px 0px 0px #bee2f9;
 }
-.main {
-   color: #76b8ff;
-}
-.timeSet {
-   ime-mode:disabled;
-   width:20px;
-}
-.listRecord tr.title { color: white; background-color: #8a2f12; width: 100%;}
-.listRecord tr td {  width:100px; }
-.listRecord tr td.w {  width:300px; }
-.listRecord td.t1 { border-top-width: 1px; border-top-style: solid; color: black; }
-.listRecord td.r1 { border-right-width: 1px; border-right-style: solid; color: black; }
-.listRecord td.b1 { border-bottom-width: 1px; border-bottom-style: solid; color: black; }
-.listRecord td.l1 { border-left-width: 1px; border-left-style: solid; color: black; }
-
-.listRecord td.b3 { border-bottom-style: solid; color: #d6fff3; background-color: #8b17ff;}
+td.t1 { color: blue; }

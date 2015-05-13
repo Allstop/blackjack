@@ -11,47 +11,49 @@ class Controller {
 
     public function __construct()
     {
-        $this->Model = new Model();
+        $this->Model = Model::init();
     }
 
-    public function createDeck()
+    public function game_Deal()
     {
         if (!$_SESSION) {
-            $deck = $this->Model->createDeck();
-            $a[1] = array_pop($deck);
-            $a[2] = array_pop($deck);
-            $b[1] = array_pop($deck);
-            $b[2] = array_pop($deck);
-            $_SESSION['a']=$a;
-            $_SESSION['b']=$b;
-            $_SESSION['deck']=$deck;
+            $status = $this->Model->game_Deal();
+            $_SESSION['f']=$status['f'];
+            $_SESSION['a']=$status['a'];
+            $_SESSION['a']['num']=$this->Model->game_Sum($_SESSION['a'])['num'];
+            $_SESSION['a']['sum']=$this->Model->game_Sum($_SESSION['a'])['sumValue'];
+            $_SESSION['b']=$status['b'];
+            $_SESSION['b']['num']=$this->Model->game_Sum($_SESSION['b'])['num'];
+            $_SESSION['b']['sum']=$this->Model->game_Sum($_SESSION['b'])['sumValue'];
+            $_SESSION['deck']=$status['deck'];
         }
-        return View::render(array('status' => $_SESSION));
+        return View::render(array('status' => array(a=>$_SESSION['a'], b=>$_SESSION['b'])));
+
     }
 
-    public function game_Reset()
-    {
-        session_destroy();
-    }
+//    public function game_Sum(){
+//        $status = $this->Model->game_Sum($_POST);
+//        return View::render(array('status' => $status));
+//    }
 
-    public function game_Sum(){
-        $status = $this->Model->game_Sum($_SESSION);
+    public function game_Spilt(){
+        $status = $this->Model->game_Spilt($_SESSION['b']);
         return View::render(array('status' => $status));
     }
-
     public function game_Hit()
     {
         $status = $this->Model->game_Hit($_SESSION[$_GET['i']], $_SESSION['deck']);
-        $_SESSION[$_GET['i']]=$status['data'];
+        $_SESSION[$_GET['i']][$status['num']]= $status['data'];
+        $_SESSION[$_GET['i']]['num']=$this->Model->game_Sum($_SESSION[$_GET['i']])['num'];
+        $_SESSION[$_GET['i']]['sum']=$this->Model->game_Sum($_SESSION[$_GET['i']])['sumValue'];
         $_SESSION['deck']=$status['deck'];
-        return View::render(array('status' => $_SESSION));
+        return View::render(array('status' => array(a=>$_SESSION['a'], b=>$_SESSION['b'])));
     }
 
-    public function game_Fold()
+    public function game_Stand()
     {
-        $status = $this->Model->game_Fold($_SESSION, $this->Model->game_Sum($_SESSION)['sumValue']);
-
-        return View::render(array('status' => $status));
-        $this->game_Reset();
+//        $status = $this->Model->game_Stand($_SESSION, $this->Model->game_Sum($_SESSION)['sumValue']);
+//        return View::render(array('status' => $status));
+        session_destroy();
     }
 }
