@@ -16,7 +16,7 @@ class Controller {
 
     public function game_Deal()
     {
-        if (!$_SESSION) {
+        if (!$_SESSION['a']) {
             $status = $this->Model->game_Deal();
             $_SESSION['f']=$status['f'];
             $_SESSION['a']=$status['a'];
@@ -38,7 +38,11 @@ class Controller {
 
     public function game_Spilt(){
         $status = $this->Model->game_Spilt($_SESSION['b']);
-        return View::render(array('status' => $status));
+        $_SESSION['b']=$status['b'];
+        $_SESSION['b1']=$status['b1'];
+        $_SESSION['b']['sum']=$this->Model->game_Sum($status['b'])['sumValue'];
+        $_SESSION['b1']['sum']=$this->Model->game_Sum($status['b1'])['sumValue'];
+        return View::render(array('status' => array(a=>$_SESSION['a'], b=>$_SESSION['b'], b1=>$_SESSION['b1'])));
     }
     public function game_Hit()
     {
@@ -47,7 +51,7 @@ class Controller {
         $_SESSION[$_GET['i']]['num']=$this->Model->game_Sum($_SESSION[$_GET['i']])['num'];
         $_SESSION[$_GET['i']]['sum']=$this->Model->game_Sum($_SESSION[$_GET['i']])['sumValue'];
         $_SESSION['deck']=$status['deck'];
-        return View::render(array('status' => array(a=>$_SESSION['a'], b=>$_SESSION['b'])));
+        return View::render(array('status' => array(a=>$_SESSION['a'], b=>$_SESSION['b'], b1=>$_SESSION['b1'])));
     }
 
     public function game_Stand()

@@ -63,8 +63,9 @@ class Model
         $b1['num'][1] =$data['num'][1] ;
         $b2[1] =$data[2] ;
         $b2['num'][1] =$data['num'][2] ;
-        return array(b1=>$b1, b2=>$b2);
+        return array(b=>$b1, b1=>$b2);
     }
+
     public function game_Hit($_data, $_deck)
     {
         $j=count($_data)-1;

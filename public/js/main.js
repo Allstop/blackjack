@@ -4,34 +4,81 @@ var BASE_URL = location.protocol + '//' + location.hostname;
 $('#new_game').hide();
 $('#game').hide();
 
-$(".submit_deal").click(function(){
+$(function() {
+  var aa,
+      name = $( "#name" ),
+      password = $( "#password" );
+  aa = $( "#demo" ).load( "public/log.html" ).dialog({
+    autoOpen: false,
+    modal: true,
+    buttons: {
+      "Login": function() {
+        var nameValue=$("#name").val();
+        var passwordValue=$("#password").val();
+        var list = {
+          "name" : nameValue,
+          "password" : passwordValue
+        }
+        loginCheck(list);
+        aa.dialog( "close" );
+      }
+    }
+  });
+  $( "#login-user" ).button().on( "click", function() {
+    aa.dialog( "open" );
+  });
+});
+
+$(".deal").click(function(){
   game_Deal();
   $('#game').show();
   $('#new_game').show();
-  $('.submit_deal').hide();
+  $('.deal').hide();
 });
 
-$(".submit_insurance").click(function(){
+$(".insurance").click(function(){
   game_Insurance();
 });
 
-$(".submit_spilt").click(function(){
+$(".spilt").click(function(){
   game_Spilt();
 });
 
-$(".submit_double").click(function(){
+$(".double").click(function(){
   game_Double();
 });
 
-$(".submit_hit").click(function(){
+$(".hit").click(function(){
   game_Hit();
 });
 
-$(".submit_stand").click(function(){
+$(".stand").click(function(){
+  var $touch=$("td").attr("class");
+  console.log($touch);
   game_Stand();
   $('#new_game').hide();
-  $('.submit_deal').show();
+  $('.deal').show();
 });
+//login檢查
+var loginCheck = function(list) {
+  $.ajax({
+    url: BASE_URL + "/loginCheck",
+    type: "POST",
+    dataType: "JSON",
+    data: list,
+    success: function(response) {
+      console.log(response.status);
+      if (response.status!= false) {
+        $('#hello').html('');
+        $('#hello').append('Hello,'+response.status['name']+'! You have'+response.status['money']+'!');
+      } else {
+        alert('login error! Please try agin!');
+      }
+    },
+    error: function () {
+    }
+  })
+}
 
 var game = function (response) {
   response.status['a'][1]="<img width='28' src='public/files/poker.jpg'>";
@@ -46,9 +93,15 @@ var game = function (response) {
         $Tr.append($Td2);
         $table.append($Tr);
       } else if (/[0-9]/.exec(i)) {
-        var $Td1 = $('<td>'+response.status[key][i]+'</td>');
-        $Tr.append($Td1);
-        $table.append($Tr);
+        if (/b/.exec(key)) {
+          var $Td1 = $('<td class='+key+'>'+response.status[key][i]+'</td>');
+          $Tr.append($Td1);
+          $table.append($Tr);
+        } else {
+          var $Td1 = $('<td>'+response.status[key][i]+'</td>');
+          $Tr.append($Td1);
+          $table.append($Tr);
+        }
       }
       $('#game').append($table);
     }
@@ -83,6 +136,7 @@ var game_Spilt = function() {
     type: "GET",
     dataType: "JSON",
     success: function (response) {
+      game(response);
     }
   })
 }
@@ -107,9 +161,8 @@ var game_Hit = function() {
       game(response);
       if (response.status.b['sum']>21) {
         alert("Boom! You lose!");
-        game_Stand();
-        $('#new_game').hide();
-        $('.submit_deal').show();
+        //是執行.stand的click事件
+        $(".stand").trigger("click");
       }
     }
   })
