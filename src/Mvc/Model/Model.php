@@ -73,33 +73,52 @@ class Model
         return array(num=>$j, data=>$_data[$j], deck=>$_deck);
     }
 
-    public function game_Stand($data, $sum)
+    public function game_Stand($data)
     {
-        $a=$this->game_Sum($data)['output']['a'];
-        $sum['a']=$this->game_Sum($data)['sumValue']['a'];
-
-        if ($sum['b']>21) {
-            $ans="BOOM!!! You lose!";
+        $data['a'][1]=$data['f'][1];
+        $data['a']['num']=$this->game_Sum($data['a'])['num'];
+        $data['a']['sum']=$this->game_Sum($data['a'])['sumValue'];
+        if ($data['b']['sum']>21 ) {
+            $ans="You lose!";
+            $multiple=0;
         } else {
-            while ($sum['a']<17) {
+            while ($data['a']['sum']<17) {
                 $aa=$this->game_Hit($data['a'], $data['deck']);
-                $data['a']=$aa['data'];
-                $a=$this->game_Sum($data)['output']['a'];
-                $sum['a']=$this->game_Sum($data)['sumValue']['a'];
+                $data['a'][$aa['num']]=$aa['data'];
+                $data['a']['num']=$this->game_Sum($data['a'])['num'];
+                $data['a']['sum']=$this->game_Sum($data['a'])['sumValue'];
             }
-            if (count($data['a'])>4) {
-                $ans="START!!! You lose!";
-            } elseif (count($data['b'])>4) {
-                $ans="START!!! You win!";
-            } elseif ($sum['a']>21) {
+            //過五關*2
+            if (count($data['b'])-2>4) {
+                if (count($data['a'])-2>4 && $data['a']['sum']<22) {
+                    $ans="START!!! You lose!";
+                    $multiple=0;
+                } else {
+                    $ans="START!!! You win!";
+                    $multiple=2;
+                }
+            //black*1.5
+            } elseif (count($data['b'])-2 == 2 && $data['b']['sum'] == 21) {
+                if (count($data['a'])-2 == 2 && $data['a']['sum'] == 21) {
+                    $ans="GM also Black Jack!!! You lose!";
+                    $multiple=0;
+                } else {
+                    $ans="Black Jack!!! You win!";
+                    $multiple=1.5;
+                }
+            } elseif ($data['a']['sum']>21) {
                 $ans="You win!";
-            } elseif ($sum['b']>$sum['a']) {
+                $multiple=1;
+            } elseif ($data['b']['sum']>$data['a']['sum']) {
                 $ans="You win!";
+                $multiple=1;
             } else {
                 $ans="You lose!";
+                $multiple=0;
             }
         }
-        $result=array_merge(array(output=>$a, sumValue=>$sum['a']), array(ans=>$ans));
+
+        $result=array(a=>$data['a'],result=>$ans, multiple=>$multiple);
         return $result;
     }
 }

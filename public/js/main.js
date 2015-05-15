@@ -1,14 +1,18 @@
 //全域變數
 var BASE_URL = location.protocol + '//' + location.hostname;
-
-$('#new_game').hide();
+    betAmount='';
 $('#game').hide();
 
-$(function() {
-  var aa,
-      name = $( "#name" ),
-      password = $( "#password" );
-  aa = $( "#demo" ).load( "public/log.html" ).dialog({
+$("#money input").click(function(){
+  var $touch=$(this).attr("class"),
+      touchEvent = $touch.split(' ');
+  betAmount = touchEvent[1];
+  $('#betAmount').html("");
+  $('#betAmount').append('下注金額：$'+betAmount);
+});
+
+
+var aa = $( "#user" ).load( "public/log.html" ).dialog({
     autoOpen: false,
     modal: true,
     buttons: {
@@ -24,28 +28,36 @@ $(function() {
       }
     }
   });
-  $( "#login-user" ).button().on( "click", function() {
-    aa.dialog( "open" );
-  });
+
+$("#login-user").click(function(){
+  aa.dialog( "open" );
 });
 
 $(".deal").click(function(){
-  game_Deal();
-  $('#game').show();
-  $('#new_game').show();
-  $('.deal').hide();
+    game_Deal();
 });
 
 $(".insurance").click(function(){
+  console.log(betAmount);
   game_Insurance();
 });
 
 $(".spilt").click(function(){
+  var $touch=$(".t1").text(),
+    touchEvent = $touch.split('SUM:');
+  console.log($touch);
+  console.log(touchEvent);
   game_Spilt();
 });
 
 $(".double").click(function(){
-  game_Double();
+  var $touch=$(".t1").text(),
+      touchEvent = $touch.split('SUM:');
+  console.log($touch);
+  console.log(touchEvent);
+
+  game_Hit();
+  $(".stand").trigger("click");
 });
 
 $(".hit").click(function(){
@@ -53,10 +65,8 @@ $(".hit").click(function(){
 });
 
 $(".stand").click(function(){
-  var $touch=$("td").attr("class");
-  console.log($touch);
   game_Stand();
-  $('#new_game').hide();
+  $('#game').hide();
   $('.deal').show();
 });
 //login檢查
@@ -67,10 +77,9 @@ var loginCheck = function(list) {
     dataType: "JSON",
     data: list,
     success: function(response) {
-      console.log(response.status);
       if (response.status!= false) {
         $('#hello').html('');
-        $('#hello').append('Hello,'+response.status['name']+'! You have'+response.status['money']+'!');
+        $('#hello').append('Hello,'+response.status['name']+'! You have $'+response.status['money']+'!');
       } else {
         alert('login error! Please try agin!');
       }
@@ -80,30 +89,52 @@ var loginCheck = function(list) {
   })
 }
 
-var game = function (response) {
-  response.status['a'][1]="<img width='28' src='public/files/poker.jpg'>";
-  $('#game').html('');
-  var $table = $('<table></table>');;
+var gameA = function (response) {
+  if (!response.status['a'][1]) {
+    response.status['a'][1]="<img width='28' src='public/files/poker.jpg'>";
+  }
+  var $table = $('<table></table>');
   for (var key in response.status ) {
-    var $Tr = $('<tr></tr>');
-
-    for (var i in response.status[key] ) {
-      if (/sum/.exec(i)) {
-        var $Td2 = $('<td class="t1">SUM:'+response.status[key][i]+'</td>');
-        $Tr.append($Td2);
-        $table.append($Tr);
-      } else if (/[0-9]/.exec(i)) {
-        if (/b/.exec(key)) {
-          var $Td1 = $('<td class='+key+'>'+response.status[key][i]+'</td>');
-          $Tr.append($Td1);
+    if (/a/.exec(key)) {
+      var $Tr = $('<tr></tr>');
+      for (var i in response.status[key] ) {
+        if (/sum/.exec(i)) {
+          var $Td2 = $('<td class="t1">SUM:'+response.status[key][i]+'</td>');
+          $Tr.append($Td2);
           $table.append($Tr);
-        } else {
+        } else if (/[0-9]/.exec(i)) {
           var $Td1 = $('<td>'+response.status[key][i]+'</td>');
           $Tr.append($Td1);
           $table.append($Tr);
         }
       }
-      $('#game').append($table);
+    }
+    $('#gameA').html('');
+    if (response.status.result) {
+      $('#gameA').append("<style=>"+response.status.result+"<br><br>");
+    }
+    $('#gameA').append($table);
+  }
+}
+
+var gameB = function (response) {
+  var $table = $('<table></table>');
+  for (var key in response.status ) {
+    if (/b/.exec(key)) {
+      var $Tr = $('<tr></tr>');
+      for (var i in response.status[key] ) {
+        if (/sum/.exec(i)) {
+          var $Td2 = $('<td class="t1">SUM:'+response.status[key][i]+'</td>');
+          $Tr.append($Td2);
+          $table.append($Tr);
+        } else if (/[0-9]/.exec(i)) {
+          var $Td1 = $('<td>'+response.status[key][i]+'</td>');
+          $Tr.append($Td1);
+          $table.append($Tr);
+        }
+        $('#gameB').html('');
+        $('#gameB').append($table);
+      }
     }
   }
 }
@@ -114,12 +145,20 @@ var game_Deal = function() {
     dataType: "JSON",
     type: "get",
     success: function (response) {
-      game(response);
+      console.log(response.status);
+      $('#game').show();
+      $('.deal').hide();
+      gameA(response);
+      gameB(response);
+      if (response.status.b['sum']==21) {
+        //是執行.stand的click事件
+        $(".stand").trigger("click");
+      }
     }
   })
 }
 //game_保險
-var game_Insurance = function() {
+var game_Insurance = function(betAmount) {
   $.ajax({
     url: BASE_URL + "/game_Insurance",
     type: "GET",
@@ -136,17 +175,7 @@ var game_Spilt = function() {
     type: "GET",
     dataType: "JSON",
     success: function (response) {
-      game(response);
-    }
-  })
-}
-//game_雙倍
-var game_Double = function() {
-  $.ajax({
-    url: BASE_URL + "/game_Double",
-    type: "GET",
-    dataType: "JSON",
-    success: function (response) {
+      gameB(response);
     }
   })
 }
@@ -158,9 +187,8 @@ var game_Hit = function() {
     dataType: "JSON",
     data: {i:"b"} ,
     success: function (response) {
-      game(response);
+      gameB(response);
       if (response.status.b['sum']>21) {
-        alert("Boom! You lose!");
         //是執行.stand的click事件
         $(".stand").trigger("click");
       }
@@ -174,10 +202,7 @@ var game_Stand = function() {
     type: "GET",
     dataType: "JSON",
     success: function (response) {
-      $('#game').html('');
-      $('#game').append("<style=>"+response.status.ans+"<br><br>");
-      $('#game').append(response.status.output);
-      $('#game').append("&nbsp;&nbsp;&nbsp;SUM:"+response.status.sumValue+"<br>");
+      gameA(response);
     }
   })
 }

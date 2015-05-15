@@ -27,7 +27,8 @@ class Controller {
             $_SESSION['b']['sum']=$this->Model->game_Sum($_SESSION['b'])['sumValue'];
             $_SESSION['deck']=$status['deck'];
         }
-        return View::render(array('status' => array(a=>$_SESSION['a'], b=>$_SESSION['b'])));
+        asort($_SESSION);
+        return View::render(array('status' => array_slice($_SESSION, 1, -1)));
 
     }
 
@@ -44,6 +45,7 @@ class Controller {
         $_SESSION['b1']['sum']=$this->Model->game_Sum($status['b1'])['sumValue'];
         return View::render(array('status' => array(a=>$_SESSION['a'], b=>$_SESSION['b'], b1=>$_SESSION['b1'])));
     }
+
     public function game_Hit()
     {
         $status = $this->Model->game_Hit($_SESSION[$_GET['i']], $_SESSION['deck']);
@@ -51,13 +53,16 @@ class Controller {
         $_SESSION[$_GET['i']]['num']=$this->Model->game_Sum($_SESSION[$_GET['i']])['num'];
         $_SESSION[$_GET['i']]['sum']=$this->Model->game_Sum($_SESSION[$_GET['i']])['sumValue'];
         $_SESSION['deck']=$status['deck'];
-        return View::render(array('status' => array(a=>$_SESSION['a'], b=>$_SESSION['b'], b1=>$_SESSION['b1'])));
+        return View::render(array('status' => array($_GET['i']=>$_SESSION[$_GET['i']])));
     }
 
     public function game_Stand()
     {
-//        $status = $this->Model->game_Stand($_SESSION, $this->Model->game_Sum($_SESSION)['sumValue']);
-//        return View::render(array('status' => $status));
+
+        //var_dump($_SESSION['b']);
+        $status = $this->Model->game_Stand($_SESSION);
+        //var_dump($status);
         session_destroy();
+        return View::render(array('status' => $status));
     }
 }
