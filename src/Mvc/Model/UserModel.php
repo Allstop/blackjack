@@ -30,10 +30,10 @@ class UserModel extends db
         return static::$user;
     }
     //*檢查登入資料是否已存在
-    public function loginCheck($gtPost)
+    public function loginCheck($data)
     {
         $sql = self::$db->prepare("SELECT name,money FROM players
-        where name='".$gtPost['name']."' and password='".$gtPost['password']."' "
+        where name='".$data['name']."' and password='".$data['password']."' "
         );
         if ($sql->execute()) {
             $sql=$sql->fetch(\PDO::FETCH_ASSOC);

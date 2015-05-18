@@ -17,30 +17,6 @@ div#users-contain table { margin: 1em 0; border-collapse: collapse; width: 100%;
 div#users-contain table td, div#users-contain table th { border: 1px solid #eee; padding: .6em 10px; text-align: left; }
 .ui-dialog .ui-state-error { padding: .3em; }
 
-input.money {
-   width: 50px;
-   height: 50px;
-   font-size:15px;
-   font-family:Arial;
-   font-weight:normal;
-   -moz-border-radius:28px;
-   -webkit-border-radius:28px;
-   border-radius:28px;
-   border:1px solid #eeb44f;
-
-   text-decoration:none;
-   background:-moz-linear-gradient( center top, #ffce79 15%, #eeaf41 90% );
-   background:-ms-linear-gradient( top, #ffce79 15%, #eeaf41 90% );
-   filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffce79', endColorstr='#eeaf41');
-   background:-webkit-gradient( linear, left top, left bottom, color-stop(15%, #ffce79), color-stop(90%, #eeaf41) );
-   background-color:#ffce79;
-   color:#ffffff;
-   display:inline-block;
-   text-shadow:-1px 1px 2px #ce8e28;
-   -webkit-box-shadow: -28px -5px 15px -34px #fceaca;
-   -moz-box-shadow: -28px -5px 15px -34px #fceaca;
-   box-shadow: -28px -5px 15px -34px #fceaca;
-}
 #login-user { position: absolute;
                top: 10px;
                right: 10px;
@@ -66,5 +42,29 @@ input.game {
    -webkit-box-shadow:inset 1px 1px 0px 0px #bee2f9;
    -moz-box-shadow:inset 1px 1px 0px 0px #bee2f9;
    box-shadow:inset 1px 1px 0px 0px #bee2f9;
+}
+input.money {
+   width: 50px;
+   height: 50px;
+   font-size:15px;
+   font-family:Arial;
+   font-weight:normal;
+   -moz-border-radius:28px;
+   -webkit-border-radius:28px;
+   border-radius:28px;
+   border:1px solid #eeb44f;
+
+   text-decoration:none;
+   background:-moz-linear-gradient( center top, #ffce79 15%, #eeaf41 90% );
+   background:-ms-linear-gradient( top, #ffce79 15%, #eeaf41 90% );
+   filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffce79', endColorstr='#eeaf41');
+   background:-webkit-gradient( linear, left top, left bottom, color-stop(15%, #ffce79), color-stop(90%, #eeaf41) );
+   background-color:#ffce79;
+   color:#ffffff;
+   display:inline-block;
+   text-shadow:-1px 1px 2px #ce8e28;
+   -webkit-box-shadow: -28px -5px 15px -34px #fceaca;
+   -moz-box-shadow: -28px -5px 15px -34px #fceaca;
+   box-shadow: -28px -5px 15px -34px #fceaca;
 }
 td.t1 { color: blue; }

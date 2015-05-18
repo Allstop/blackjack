@@ -19,6 +19,7 @@ class Controller {
         if (!$_SESSION['a']) {
             $status = $this->Model->game_Deal();
             $_SESSION['f']=$status['f'];
+            $_SESSION['f']['num']=$this->Model->game_Sum($_SESSION['f'])['num'];
             $_SESSION['a']=$status['a'];
             $_SESSION['a']['num']=$this->Model->game_Sum($_SESSION['a'])['num'];
             $_SESSION['a']['sum']=$this->Model->game_Sum($_SESSION['a'])['sumValue'];
@@ -36,6 +37,20 @@ class Controller {
 //        $status = $this->Model->game_Sum($_POST);
 //        return View::render(array('status' => $status));
 //    }
+
+    public function game_Insurance(){
+
+        if ($_SESSION['a']['num']=11) {
+            if ($_SESSION['f']['num']=10) {
+                return View::render(array('status' => 1));
+            } else {
+                return View::render(array('status' => 0));
+            }
+        } else {
+            return View::render(array('status' => false));
+        }
+
+    }
 
     public function game_Spilt(){
         $status = $this->Model->game_Spilt($_SESSION['b']);

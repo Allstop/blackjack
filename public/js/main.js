@@ -38,7 +38,6 @@ $(".deal").click(function(){
 });
 
 $(".insurance").click(function(){
-  console.log(betAmount);
   game_Insurance();
 });
 
@@ -145,7 +144,6 @@ var game_Deal = function() {
     dataType: "JSON",
     type: "get",
     success: function (response) {
-      console.log(response.status);
       $('#game').show();
       $('.deal').hide();
       gameA(response);
@@ -158,13 +156,18 @@ var game_Deal = function() {
   })
 }
 //game_保險
-var game_Insurance = function(betAmount) {
+var game_Insurance = function() {
   $.ajax({
     url: BASE_URL + "/game_Insurance",
     type: "GET",
     dataType: "JSON",
-
     success: function (response) {
+      if (response.status == false) {
+          alert("條件不符，莊家牌面須為A");
+      } else {
+        var Amount = betAmount*0.5*response.status;
+        console.log(Amount);
+      }
     }
   })
 }

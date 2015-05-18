@@ -16,15 +16,18 @@ class UserController
     {
         $this->Model = UserModel::init();
         self::$data = new Data();
-        $_SESSION['name'] = $this->gtPost['name'];
-        $_SESSION['password'] = $this->gtPost['password'];
-
     }
     //登入檢查
     public function loginCheck()
     {
-        $status = $this->Model->loginCheck($_POST);
-        return View::render(array('status' => $status));
+        $status = $this->Model->loginCheck(self::$data->getData());
+        if ($status == false ) {
+            return View::render(array('status' => $status));
+        } else {
+            $_SESSION['name'] = self::$data->getData()['name'];
+            $_SESSION['money'] = self::$data->getData()['money'];
+            return View::render(array('status' => $status));
+        }
     }
     //建立
     public function create()
