@@ -20,14 +20,23 @@ class UserController
     //登入檢查
     public function loginCheck()
     {
-        $status = $this->Model->loginCheck(self::$data->getData());
-        if ($status == false ) {
-            return View::render(array('status' => $status));
+        if (!$_SESSION['name']) {
+            $status = $this->Model->loginCheck(self::$data->getData());
+            if ($status == false ) {
+                return View::render(array('status' => $status));
+            } else {
+                $_SESSION['name'] = $status['name'];
+                $_SESSION['money'] = $status['money'];
+                return View::render(array('status' => $status));
+            }
         } else {
-            $_SESSION['name'] = self::$data->getData()['name'];
-            $_SESSION['money'] = self::$data->getData()['money'];
-            return View::render(array('status' => $status));
+            return View::render(array('status' => $_SESSION));
         }
+    }
+    //登出
+    public function logout()
+    {
+        session_destroy();
     }
     //建立
     public function create()

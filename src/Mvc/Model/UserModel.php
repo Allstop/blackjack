@@ -42,6 +42,19 @@ class UserModel extends db
             return false;
         }
     }
+
+    public function game_Insurance($data)
+    {
+        $sql = self::$db->prepare("UPDATE players SET money= '".$data['name']."'
+        WHERE  name='".$data['name']."'"
+        );
+        if ($sql->execute()) {
+            $sql=$sql->fetch(\PDO::FETCH_ASSOC);
+            return $sql;
+        } else {
+            return false;
+        }
+    }
     //*建立使用者
     public function create($gtPost)
     {

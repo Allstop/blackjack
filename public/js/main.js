@@ -1,16 +1,19 @@
 //全域變數
 var BASE_URL = location.protocol + '//' + location.hostname;
     betAmount='';
-$('#game').hide();
+    moneyVal='';
 
-$("#money input").click(function(){
+$(document).on("click","#submitBetAmount input",function(){
   var $touch=$(this).attr("class"),
       touchEvent = $touch.split(' ');
   betAmount = touchEvent[1];
+  moneyVal = moneyVal-betAmount;
+  $('#money').html('');
+  $('#money').append('You have $'+moneyVal+'!');
   $('#betAmount').html("");
   $('#betAmount').append('下注金額：$'+betAmount);
+  $('#game').load( "public/game.html"), function() {}
 });
-
 
 var aa = $( "#user" ).load( "public/log.html" ).dialog({
     autoOpen: false,
@@ -29,19 +32,19 @@ var aa = $( "#user" ).load( "public/log.html" ).dialog({
     }
   });
 
-$("#login-user").click(function(){
-  aa.dialog( "open" );
+$(document).on("click","#logout",function(){
+  logout();
 });
 
-$(".deal").click(function(){
-    game_Deal();
+$(document).on("click",".deal",function(){
+  game_Deal();
 });
 
-$(".insurance").click(function(){
+$(document).on("click",".insurance",function(){
   game_Insurance();
 });
 
-$(".spilt").click(function(){
+$(document).on("click",".spilt",function(){
   var $touch=$(".t1").text(),
     touchEvent = $touch.split('SUM:');
   console.log($touch);
@@ -49,24 +52,29 @@ $(".spilt").click(function(){
   game_Spilt();
 });
 
-$(".double").click(function(){
-  var $touch=$(".t1").text(),
-      touchEvent = $touch.split('SUM:');
-  console.log($touch);
-  console.log(touchEvent);
-
+$(document).on("click",".double",function(){
+  betAmount = betAmount*2;
+  moneyVal = moneyVal-betAmount;
+  $('#betAmount').html("");
+  $('#betAmount').append('下注金額：$'+betAmount);
+  $('#money').html('');
+  $('#money').append('You have $'+moneyVal+'!');
   game_Hit();
   $(".stand").trigger("click");
 });
 
-$(".hit").click(function(){
+$(document).on("click",".hit",function(){
   game_Hit();
 });
 
-$(".stand").click(function(){
+$(document).on("click",".stand",function(){
   game_Stand();
-  $('#game').hide();
+  $('#game_submit').hide();
   $('.deal').show();
+});
+
+$(document).on("click","#wash",function(){
+  game_Wash();
 });
 //login檢查
 var loginCheck = function(list) {
@@ -76,11 +84,17 @@ var loginCheck = function(list) {
     dataType: "JSON",
     data: list,
     success: function(response) {
-      if (response.status!= false) {
-        $('#hello').html('');
-        $('#hello').append('Hello,'+response.status['name']+'! You have $'+response.status['money']+'!');
+      if (response.status == false) {
+        aa.dialog( "open" );
       } else {
-        alert('login error! Please try agin!');
+        $("#log").html('');
+        $('#log').append('<button id="logout">登出</button>');
+        $('#hello').html('');
+        $('#hello').append('Hello,'+response.status['name']+'!');
+        $('#money').html('');
+        $('#money').append('You have $'+response.status['money']+'!');
+        moneyVal = response.status['money'];
+        $('#submitBetAmount').load( "public/BetAmount.html");
       }
     },
     error: function () {
@@ -110,7 +124,7 @@ var gameA = function (response) {
     }
     $('#gameA').html('');
     if (response.status.result) {
-      $('#gameA').append("<style=>"+response.status.result+"<br><br>");
+      $('#gameA').append('<h2 style="color:red">'+response.status.result+'<br><br>');
     }
     $('#gameA').append($table);
   }
@@ -144,13 +158,29 @@ var game_Deal = function() {
     dataType: "JSON",
     type: "get",
     success: function (response) {
-      $('#game').show();
-      $('.deal').hide();
-      gameA(response);
-      gameB(response);
-      if (response.status.b['sum']==21) {
-        //是執行.stand的click事件
-        $(".stand").trigger("click");
+      if (response.status == false) {
+        alert("請先登入！");
+      } else {
+        $('#game_submit').show();
+        $('.deal').hide();
+        gameA(response);
+        gameB(response);
+        $('#game_submit').html('');
+        $('#game_submit').append('<input type="submit" class="game stand" value="送出(Stand)">');
+        if (response.status.b['sum']>20) {
+          //是執行.stand的click事件
+          $(".stand").trigger("click");
+        } else {
+          $('#game_submit').append('<input type="submit" class="game double" value="雙倍(Double)">');
+          $('#game_submit').append('<input type="submit" class="game hit" value="發牌(Hit)">');
+          if (response.status.a['num'][2]==11) {
+            $('#game_submit').append('<input type="submit" class="game insurance" value="保險(Insurance)">');
+          }
+          if (response.status.b['num'][1]==response.status.b['num'][2]) {
+            $('#game_submit').append('<input type="submit" class="game spilt" value="分牌(Spilt)">');
+          }
+        }
+
       }
     }
   })
@@ -191,7 +221,8 @@ var game_Hit = function() {
     data: {i:"b"} ,
     success: function (response) {
       gameB(response);
-      if (response.status.b['sum']>21) {
+      console.log(response.status.b);
+      if (response.status.b['sum']>20) {
         //是執行.stand的click事件
         $(".stand").trigger("click");
       }
@@ -209,3 +240,25 @@ var game_Stand = function() {
     }
   })
 }
+
+var game_Wash = function() {
+  $.ajax({
+    url: BASE_URL + "/game_wash"
+  })
+}
+
+var logout = function() {
+  $.ajax({
+    url: BASE_URL + "/logout",
+    success: function () {
+      $('#game').hide();
+      $('.deal').hide();
+      loginCheck();
+    }
+  })
+}
+
+loginCheck();
+//登出,釋放session,清空username，回到初始畫面
+//$("#log").html('');
+//$('#log').append('<button id="login">登入</button>');
