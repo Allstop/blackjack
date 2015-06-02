@@ -10,12 +10,34 @@ class Model
 
     public static $user = null;
 
+    private static $db = null;
+
     public static function init()
     {
         if (!static::$user) {
             static::$user = new self();
         }
         return static::$user;
+    }
+
+    public function __construct($filename = null, $path = null)
+    {
+        try {
+            self::$db = array();
+            if (! $path) {
+                $path = dirname(dirname(dirname(__DIR__))).'/config';
+            }
+            if (! $filename) {
+                $filename = 'config.php';
+            }
+            self::$db = require(implode('/', array($path, $filename)));
+            self::$db = new \PDO(self::$db['db']['dsn'], self::$db['db']['user'], self::$db['db']['pwd']);
+            self::$db->query('set character set utf8');
+            $this->status = true;
+        } catch (PDOException $e) {
+            $this->status = false;
+            return;
+        }
     }
 
     public function game_Deck()
@@ -32,6 +54,7 @@ class Model
         shuffle($deck);
         return $deck;
     }
+
     public function game_Deal($deck)
     {
         $first[1] = array_pop($deck);
@@ -120,7 +143,7 @@ class Model
             } elseif (count($data['b'])-2 == 2 && $data['b']['sum'] == 21) {
                 if (count($data['a'])-2 == 2 && $data['a']['sum'] == 21) {
                     $ans="GM also Black Jack!!! You lose!";
-                    $multiple=0;
+                    $multiple=-1;
                 } else {
                     $ans="Black Jack!!! You win!";
                     $multiple=1.5;
@@ -130,24 +153,28 @@ class Model
                 $multiple=1;
             } elseif (count($data['a'])-2>4 && $data['a']['sum']<22) {
                 $ans="You lose!";
-                $multiple=0;
+                $multiple=-1;
             } elseif ($data['b']['sum']>$data['a']['sum']) {
                 $ans="You win!";
                 $multiple=1;
             } else {
                 $ans="You lose!";
-                $multiple=0;
+                $multiple=-1;
             }
         }
-
-//        $Money = self::$db->prepare("UPDATE players SET money= $endMoney
-////        WHERE  name='".$data['name']."'"
-//        );
-//        if ($Money->execute()) {
-//            $Money=$Money->fetch(\PDO::FETCH_ASSOC);
-//        }
-
         return array(show=>array(a=>$data['a'], result=>$ans, multiple=>$multiple),
                      deck=>$deck);
+    }
+    public function Money($name,$Bonus) {
+        try {
+            $Money = self::$db->prepare(
+                "UPDATE players SET money= money+:_Bonus
+        WHERE  name=:_name");
+            $Money->bindvalue(':_name', $name);
+            $Money->bindvalue(':_Bonus', $Bonus);
+            return ($Money->execute()) ? $Bonus : false;
+        } catch (\PDOException $e) {
+            return false;
+        }
     }
 }

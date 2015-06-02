@@ -21,6 +21,13 @@ div#users-contain table td, div#users-contain table th { border: 1px solid #eee;
                top: 10px;
                right: 10px;
                border: 1px blue none;}
+input.reset {
+   border-radius:5px;
+   padding:5px 10px;
+   display:inline-block;
+   background:-webkit-gradient( linear, left top, left bottom, color-stop(52%, #eeea7c), color-stop(53%, #f9ffa9) );
+
+}
 input.game {
    font-size:16px;
    font-family:Arial;

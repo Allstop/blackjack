@@ -29,7 +29,8 @@ class Controller {
                 $_SESSION['show']=$status['show'];
                 $_SESSION['hide']=$status['hide'];
             }
-            return View::render(array('status' => $_SESSION['show']));
+            return View::render(array('status' => $_SESSION['show'],
+                                      'lastdeck' => count($_SESSION['hide']['deck'])));
         }
     }
 
@@ -39,17 +40,17 @@ class Controller {
     }
 
     public function game_Insurance(){
-
-        if ($_SESSION['show']['a']['num']=11) {
-            if ($_SESSION['hide']['a']['num']=21) {
-                return View::render(array('status' => 1));
+        if ($_SESSION['hide']['a']['num'][2] == 11) {
+            if ($_SESSION['hide']['a']['sum'] == 21) {
+                $Amount = $_GET['Amount']*1;
             } else {
-                return View::render(array('status' => 0));
+                $Amount = $_GET['Amount']*(-1);
             }
+            $status = $this->Model->Money($_SESSION['name'],$Amount);
+            return View::render(array('status' => $status));
         } else {
             return View::render(array('status' => false));
         }
-
     }
 
     public function game_Spilt(){
@@ -73,7 +74,8 @@ class Controller {
         $_SESSION['show'][$_GET['i']]['num']=$this->Model->game_Sum($_SESSION['show'][$_GET['i']])['num'];
         $_SESSION['show'][$_GET['i']]['sum']=$this->Model->game_Sum($_SESSION['show'][$_GET['i']])['sum'];
         $_SESSION['hide']['deck']=$status['deck'];
-        return View::render(array('status' => array($_GET['i']=>$_SESSION['show'][$_GET['i']])));
+        return View::render(array('status' => array($_GET['i']=>$_SESSION['show'][$_GET['i']]),
+                                  'lastdeck' => count($_SESSION['hide']['deck'])));
     }
 
     public function game_Stand()
@@ -85,11 +87,15 @@ class Controller {
         if ($_SESSION['show']) {
             $status = $this->Model->game_Stand($_SESSION['show'], $_SESSION['hide']['deck']);
             $_SESSION['hide']['deck']=$status['deck'];
+            $Amount = $this->Model->Money($_SESSION['name'],$_GET['Amount']* $status['show']['multiple']);
             unset($_SESSION['show']);
-            return View::render(array('status' => $status['show']));
+            return View::render(array('status' => $status['show'],
+                                      'lastdeck' => count($_SESSION['hide']['deck']),
+                                      'amount' => $Amount));
         }
-        return View::render(array('status' => false));
+        return View::render(array('status' => $_SESSION));
     }
+
     public function game_Wash()
     {
         unset($_SESSION['hide']);

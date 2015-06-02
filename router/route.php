@@ -16,6 +16,7 @@ $mux->get('/game_Stand', ['Mvc\Controller\Controller', 'game_Stand']);
 $mux->get('/game_Wash', ['Mvc\Controller\Controller', 'game_Wash']);
 //*登入檢查
 $mux->post('/loginCheck', ['Mvc\Controller\UserController', 'loginCheck']);
+$mux->get('/money', ['Mvc\Controller\UserController', 'money']);
 $mux->get('/logout', ['Mvc\Controller\UserController', 'logout']);
 
 $mux->POST('/game_Sum', ['Mvc\Controller\Controller', 'game_Sum']);

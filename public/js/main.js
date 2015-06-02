@@ -1,18 +1,29 @@
 //全域變數
 var BASE_URL = location.protocol + '//' + location.hostname;
-    betAmount='';
+    betAmount=0;
     moneyVal='';
 
 $(document).on("click","#submitBetAmount input",function(){
   var $touch=$(this).attr("class"),
       touchEvent = $touch.split(' ');
-  betAmount = touchEvent[1];
-  moneyVal = moneyVal-betAmount;
-  $('#money').html('');
-  $('#money').append('You have $'+moneyVal+'!');
+  betAmount =parseInt(betAmount)+parseInt(touchEvent[1]);
+  moneyAmount = moneyVal-betAmount;
+  if (moneyAmount<0) {
+    alert("ERROR! You have no money!");
+  } else {
+    money();
+    $('#betAmount').html("");
+    $('#betAmount').append('下注金額：$'+betAmount+'<input type="submit" class="reset" value="reset">');
+    $('#game').load( "public/game.html"), function() {}
+  }
+});
+
+$(document).on("click",".reset",function(){
+  betAmount=0;
+  money();
   $('#betAmount').html("");
-  $('#betAmount').append('下注金額：$'+betAmount);
-  $('#game').load( "public/game.html"), function() {}
+  $('#betAmount').append('下注金額：$'+betAmount+'<input type="submit" class="reset" value="reset">');
+
 });
 
 var aa = $( "#user" ).load( "public/log.html" ).dialog({
@@ -37,7 +48,10 @@ $(document).on("click","#logout",function(){
 });
 
 $(document).on("click",".deal",function(){
+  $('.submitBetAmount').hide();
+  $('.reset').hide();
   game_Deal();
+
 });
 
 $(document).on("click",".insurance",function(){
@@ -53,14 +67,7 @@ $(document).on("click",".spilt",function(){
 });
 
 $(document).on("click",".double",function(){
-  betAmount = betAmount*2;
-  moneyVal = moneyVal-betAmount;
-  $('#betAmount').html("");
-  $('#betAmount').append('下注金額：$'+betAmount);
-  $('#money').html('');
-  $('#money').append('You have $'+moneyVal+'!');
-  game_Hit();
-  $(".stand").trigger("click");
+  game_Double();
 });
 
 $(document).on("click",".hit",function(){
@@ -69,12 +76,16 @@ $(document).on("click",".hit",function(){
 
 $(document).on("click",".stand",function(){
   game_Stand();
+  $('.submitBetAmount').show();
   $('#game_submit').hide();
   $('.deal').show();
+  $('.reset').show();
 });
 
-$(document).on("click","#wash",function(){
+$(document).on("click",".wash",function(){
   game_Wash();
+  $('#lastDeck').html('');
+  $('#lastDeck').append(52);
 });
 //login檢查
 var loginCheck = function(list) {
@@ -91,11 +102,25 @@ var loginCheck = function(list) {
         $('#log').append('<button id="logout">登出</button>');
         $('#hello').html('');
         $('#hello').append('Hello,'+response.status['name']+'!');
-        $('#money').html('');
-        $('#money').append('You have $'+response.status['money']+'!');
-        moneyVal = response.status['money'];
+        money();
         $('#submitBetAmount').load( "public/BetAmount.html");
       }
+    },
+    error: function () {
+    }
+  })
+}
+
+var money = function() {
+  $.ajax({
+    url: BASE_URL + "/money",
+    type: "GET",
+    dataType: "JSON",
+    success: function(response) {
+        moneyVal= response.status['money'];
+        moneyAmount=moneyVal-betAmount;
+        $('#money').html('');
+        $('#money').append('You have $'+moneyAmount+'!');
     },
     error: function () {
     }
@@ -128,6 +153,8 @@ var gameA = function (response) {
     }
     $('#gameA').append($table);
   }
+  $('#lastDeck').html('');
+  $('#lastDeck').append(response.lastdeck);
 }
 
 var gameB = function (response) {
@@ -150,6 +177,8 @@ var gameB = function (response) {
       }
     }
   }
+  $('#lastDeck').html('');
+  $('#lastDeck').append(response.lastdeck);
 }
 //game_新局
 var game_Deal = function() {
@@ -166,21 +195,21 @@ var game_Deal = function() {
         gameA(response);
         gameB(response);
         $('#game_submit').html('');
-        $('#game_submit').append('<input type="submit" class="game stand" value="送出(Stand)">');
         if (response.status.b['sum']>20) {
           //是執行.stand的click事件
+          $('#game_submit').append('<input type="submit" class="game stand" value="送出(Stand)">');
           $(".stand").trigger("click");
         } else {
-          $('#game_submit').append('<input type="submit" class="game double" value="雙倍(Double)">');
           $('#game_submit').append('<input type="submit" class="game hit" value="發牌(Hit)">');
-          if (response.status.a['num'][2]==11) {
+          $('#game_submit').append('<input type="submit" class="game double" value="雙倍(Double)">');
+          if (response.status.a['num'][2] == 11) {
             $('#game_submit').append('<input type="submit" class="game insurance" value="保險(Insurance)">');
           }
-          if (response.status.b['num'][1]==response.status.b['num'][2]) {
+          if (response.status.b['num'][1] == response.status.b['num'][2]) {
             $('#game_submit').append('<input type="submit" class="game spilt" value="分牌(Spilt)">');
           }
         }
-
+        $('#game_submit').append('<input type="submit" class="game stand" value="送出(Stand)">');
       }
     }
   })
@@ -191,12 +220,18 @@ var game_Insurance = function() {
     url: BASE_URL + "/game_Insurance",
     type: "GET",
     dataType: "JSON",
+    data: {Amount:betAmount*0.5} ,
     success: function (response) {
       if (response.status == false) {
-          alert("條件不符，莊家牌面須為A");
+        alert("false!");
       } else {
-        var Amount = betAmount*0.5*response.status;
-        console.log(Amount);
+        $('.insurance').hide();
+        money();
+        if (response.status>0) {
+          alert("You guss right，win $"+response.status+"!");
+        } else {
+          alert("You guss Wrong，lose $"+-response.status+"!");
+        }
       }
     }
   })
@@ -208,6 +243,7 @@ var game_Spilt = function() {
     type: "GET",
     dataType: "JSON",
     success: function (response) {
+      $('.spilt').hide();
       gameB(response);
     }
   })
@@ -221,11 +257,30 @@ var game_Hit = function() {
     data: {i:"b"} ,
     success: function (response) {
       gameB(response);
-      console.log(response.status.b);
-      if (response.status.b['sum']>20) {
+      keys=[];
+      for(var key in response.status.b['num']) keys.push(key);
+      if (response.status.b['sum']>20 | keys.length>4) {
         //是執行.stand的click事件
         $(".stand").trigger("click");
       }
+      $('#game_submit').html('');
+      $('#game_submit').append('<input type="submit" class="game hit" value="發牌(Hit)">');
+      $('#game_submit').append('<input type="submit" class="game stand" value="送出(Stand)">');
+    }
+  })
+}
+//game_Double
+var game_Double = function() {
+  $.ajax({
+    url: BASE_URL + "/game_Hit",
+    type: "GET",
+    dataType: "JSON",
+    data: {i:"b"},
+    success: function (response) {
+      $('.double').hide();
+      gameB(response);
+      betAmount = betAmount*2;
+      $(".stand").trigger("click");
     }
   })
 }
@@ -235,15 +290,17 @@ var game_Stand = function() {
     url: BASE_URL + "/game_Stand",
     type: "GET",
     dataType: "JSON",
+    data: {Amount:betAmount},
     success: function (response) {
       gameA(response);
+      money();
     }
   })
 }
 
 var game_Wash = function() {
   $.ajax({
-    url: BASE_URL + "/game_wash"
+    url: BASE_URL + "/game_Wash"
   })
 }
 

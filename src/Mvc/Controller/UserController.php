@@ -22,16 +22,20 @@ class UserController
     {
         if (!$_SESSION['name']) {
             $status = $this->Model->loginCheck(self::$data->getData());
-            if ($status == false ) {
-                return View::render(array('status' => $status));
-            } else {
+            if ($status != false ) {
                 $_SESSION['name'] = $status['name'];
-                $_SESSION['money'] = $status['money'];
-                return View::render(array('status' => $status));
             }
+            return View::render(array('status' => $status));
         } else {
             return View::render(array('status' => $_SESSION));
         }
+    }
+
+    public function money()
+    {
+        $status = $this->Model->money($_SESSION['name']);
+        $_SESSION['money'] = $status['money'];
+        return View::render(array('status' => $status));
     }
     //登出
     public function logout()

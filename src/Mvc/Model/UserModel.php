@@ -32,8 +32,21 @@ class UserModel extends db
     //*檢查登入資料是否已存在
     public function loginCheck($data)
     {
-        $sql = self::$db->prepare("SELECT name,money FROM players
+        $sql = self::$db->prepare("SELECT name FROM players
         where name='".$data['name']."' and password='".$data['password']."' "
+        );
+        if ($sql->execute()) {
+            $sql=$sql->fetch(\PDO::FETCH_ASSOC);
+            return $sql;
+        } else {
+            return false;
+        }
+    }
+
+    public function money($name)
+    {
+        $sql = self::$db->prepare("SELECT money FROM players
+        where name='".$name."' "
         );
         if ($sql->execute()) {
             $sql=$sql->fetch(\PDO::FETCH_ASSOC);
